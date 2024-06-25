@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card mt-5">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">Error en la Activación</h2>
+                    <p class="card-text">Lo sentimos, ha ocurrido un error al intentar activar tu cuenta. El enlace de activación puede ser inválido o haber expirado.</p>
+                    <p class="card-text">Por favor, intenta registrarte nuevamente o contacta con nuestro soporte técnico si el problema persiste.</p>
+                    <div class="text-center mt-4">
+                        <a href="{% url 'registro' %}" class="btn btn-primary">Volver al Registro</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

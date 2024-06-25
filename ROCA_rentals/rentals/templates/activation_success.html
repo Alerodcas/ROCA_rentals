@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card mt-5">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">¡Activación Exitosa!</h2>
+                    <p class="card-text">Tu cuenta ha sido activada correctamente. Ya puedes iniciar sesión.</p>
+                    <div class="text-center mt-4">
+                        <a href="{% url 'login' %}" class="btn btn-primary">Volver a inicio</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

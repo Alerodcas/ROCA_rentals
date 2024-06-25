@@ -1,0 +1,12 @@
+{% autoescape off %}
+Hola {{ user.p_nombre }},
+
+Gracias por registrarte en ROCA Rentals. Por favor, haz clic en el siguiente enlace para activar tu cuenta:
+
+http://{{ domain }}{% url 'activate' uidb64=uid token=token %}
+
+Si no solicitaste este registro, por favor ignora este correo.
+
+Saludos,
+El equipo de ROCA Rentals
+{% endautoescape %}

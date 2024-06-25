@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ROCA Rentals - Registro{% endblock %}
+
+{% block content %}
+<h2 class="text-center text-white">Registrarse</h2>
+<form method="post">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+        <div class="error-message">
+            {% for error in form.non_field_errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% for field in form %}
+        <div class="form-group">
+            {{ field.label_tag }}{% if not field.field.required %}<span style="color: white;"> (Opcional)</span>{% else %}<span style="color: red;"> *</span>{% endif %}
+            {{ field }}
+            {% if field.errors %}
+                <div class="error-message">
+                    {% for error in field.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary w-100">Registrarse</button>
+</form>
+<a href="{% url 'login' %}" class="go-back mt-3 d-block text-center text-white">Volver a Inicio de sesión</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-group {
+        margin-bottom: 15px;
+    }
+    .form-group label {
+        display: block;
+        color: white;
+        margin-bottom: 5px;
+    }
+    .form-group input {
+        width: 100%;
+        padding: 10px;
+        margin: 5px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    .error-message {
+        color: red;
+        font-size: 12px;
+    }
+    button {
+        width: 100%;
+        padding: 10px;
+        background-color: #F47B20;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 20px;
+    }
+    .go-back {
+        margin-top: 20px;
+        color: white;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
