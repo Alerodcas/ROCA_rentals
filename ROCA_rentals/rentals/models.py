@@ -20,6 +20,8 @@ class Usuario(AbstractUser):
     edad = models.IntegerField()
     is_active = models.BooleanField(default=False)
 
+    USERNAME_FIELD = 'correo'
+
     def __str__(self):
         return f"{self.p_nombre} {self.p_apellido}"
 

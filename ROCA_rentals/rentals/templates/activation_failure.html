@@ -13,6 +13,17 @@
                     <div class="text-center mt-4">
                         <a href="{% url 'registro' %}" class="btn btn-primary">Volver al Registro</a>
                     </div>
+                    <hr>
+                    <h5 class="text-center mt-4">¿No recibiste el correo de activación?</h5>
+                    <form method="post" action="{% url 'resend_activation_email' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <input type="email" class="form-control" name="email" placeholder="Ingresa tu correo electrónico" required>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-secondary">Reenviar correo de activación</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

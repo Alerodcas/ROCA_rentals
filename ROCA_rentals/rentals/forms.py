@@ -2,6 +2,9 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import Usuario
 from datetime import date
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import authenticate
+from django.contrib.auth import get_user_model
 
 class RegistroUsuarioForm(UserCreationForm):
     class Meta:
@@ -10,8 +13,6 @@ class RegistroUsuarioForm(UserCreationForm):
         labels = {
             'cedula': 'Cédula',
             'correo': 'Correo electrónico',
-            'password1': 'Contraseña',
-            'password2': 'Confirmar Contraseña',
             'p_nombre': 'Nombre',
             's_nombre': 'Segundo Nombre',
             'p_apellido': 'Apellido',
@@ -21,6 +22,11 @@ class RegistroUsuarioForm(UserCreationForm):
         widgets = {
             'f_nacimiento': forms.DateInput(attrs={'type': 'date'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['password1'].label = 'Contraseña'
+        self.fields['password2'].label = 'Confirmar Contraseña'
 
     def clean_cedula(self):
         cedula = self.cleaned_data['cedula']
@@ -41,3 +47,38 @@ class RegistroUsuarioForm(UserCreationForm):
         if age < 18:
             raise forms.ValidationError('Debes ser mayor de 18 años para registrarte.')
         return f_nacimiento
+
+    
+Usuario = get_user_model()
+
+class UsuarioLoginForm(AuthenticationForm):
+    username = forms.EmailField(label='Correo electrónico')
+    password = forms.CharField(label='Contraseña', widget=forms.PasswordInput)
+    
+    def clean(self):
+        username = self.cleaned_data.get('username')
+        password = self.cleaned_data.get('password')
+
+        if username is not None and password:
+            self.user_cache = authenticate(self.request, username=username, password=password)
+            if self.user_cache is None:
+                raise self.get_invalid_login_error()
+            else:
+                self.confirm_login_allowed(self.user_cache)
+
+        return self.cleaned_data
+
+    def confirm_login_allowed(self, user):
+        if not user.is_active:
+            raise forms.ValidationError('Esta cuenta no ha sido activada. Por favor, revisa tu correo para activarla.')
+
+    def get_user(self):
+        return self.user_cache if self.is_valid() else None
+
+
+
+class PasswordResetRequestForm(forms.Form):
+    email = forms.EmailField(label='Correo electrónico')
+
+
+

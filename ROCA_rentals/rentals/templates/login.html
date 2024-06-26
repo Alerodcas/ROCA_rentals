@@ -1,26 +1,37 @@
 {% extends 'base.html' %}
-{% load static %}
-
-{% block title %}ROCA Rentals - Login{% endblock %}
+{% block title %}ROCA Rentals - Inicio de Sesión{% endblock %}
 
 {% block content %}
-<form method="post" action="{% url 'login' %}">
+<h2 class="page-title">Inicio de Sesión</h2>
+<form method="post" class="login-form">
     {% csrf_token %}
     <div class="mb-3">
-        <input type="email" class="form-control" id="email" name="email" placeholder="Correo" required>
+        <input type="email" class="form-control" id="email" name="username" placeholder="Correo electrónico" required>
     </div>
     <div class="mb-3">
         <input type="password" class="form-control" id="password" name="password" placeholder="Contraseña" required>
     </div>
-    <div class="form-check mb-3">
-        <input type="checkbox" class="form-check-input" id="remember" name="remember">
-        <label class="form-check-label" for="remember">Recuérdame</label>
-    </div>
+    {% if form.non_field_errors %}
+        <div class="error-message">
+            {% for error in form.non_field_errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+    {% endif %}
     <button type="submit" class="btn btn-primary w-100">Ingresar</button>
 </form>
 <div class="links mt-4 text-center">
-    <a href="#">Olvidó su contraseña?</a>
+    <a href="{% url 'password_reset' %}">¿Olvidó su contraseña?</a>
     <br>
     <a href="{% url 'registro' %}">¿Aún no tiene cuenta? Registrarse</a>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .error-message {
+        color: red;
+        font-size: 14px;
+    }
+</style>
 {% endblock %}
