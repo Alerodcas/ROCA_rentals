@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import Usuario
+from .models import *
 from datetime import date
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate
@@ -79,6 +79,33 @@ class UsuarioLoginForm(AuthenticationForm):
 
 class PasswordResetRequestForm(forms.Form):
     email = forms.EmailField(label='Correo electrónico')
+
+class TipoForm(forms.ModelForm):
+    class Meta:
+        model = Tipo
+        fields = ['descripcion']
+        labels = {
+            'descripcion': 'Nombre',
+        }
+
+class ArrendamientoForm(forms.ModelForm):
+    class Meta:
+        model = Arrendamiento
+        fields = ['nombre', 'nise', 'med_agua', 'alquiler', 'ubicacion', 'tipo']
+        labels = {
+            'med_agua': 'Medidor de agua',
+        }
+        widgets = {
+            'alquiler': forms.TextInput(attrs={'placeholder': '₡'}),
+        }
+
+        ubicacion = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+
+
+class TipoForm(forms.ModelForm):
+    class Meta:
+        model = Tipo
+        fields = ['descripcion']
 
 
 

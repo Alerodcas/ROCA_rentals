@@ -52,16 +52,16 @@ class TelefonoUsuario(models.Model):
 
 class Arrendamiento(models.Model):
     id = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=50, null=True)  
     nise = models.CharField(max_length=50)  
     med_agua = models.CharField(max_length=50)  
-    num_casa = models.CharField(max_length=50)
     alquiler = models.DecimalField(max_digits=10, decimal_places=2)  # Kept decimal places as 2
     ubicacion = models.TextField()
     ced_usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     tipo = models.ForeignKey(Tipo, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"Arrendamiento {self.id} - {self.num_casa}"
+        return f"Arrendamiento {self.id} - {self.nombre}"
 
     
 class Inquilino(models.Model):

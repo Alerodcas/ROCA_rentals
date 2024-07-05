@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Editar Arrendamiento{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Editar Arrendamiento</h2>
+    <form method="post" action="{% url 'edit_arrendamiento' arrendamiento.id %}">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="id_nombre" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="id_nombre" name="nombre" value="{{ arrendamiento.nombre }}">
+        </div>
+        <div class="mb-3">
+            <label for="id_alquiler" class="form-label">Alquiler (₡)</label>
+            <input type="number" class="form-control" id="id_alquiler" name="alquiler" value="{{ arrendamiento.alquiler }}">
+        </div>
+        <div class="mb-3">
+            <label for="id_nise" class="form-label">NISE</label>
+            <input type="text" class="form-control" id="id_nise" name="nise" value="{{ arrendamiento.nise }}">
+        </div>
+        <div class="mb-3">
+            <label for="id_med_agua" class="form-label">Medidor de Agua</label>
+            <input type="text" class="form-control" id="id_med_agua" name="med_agua" value="{{ arrendamiento.med_agua }}">
+        </div>
+        <div class="mb-3">
+            <label for="id_ubicacion" class="form-label">Ubicación</label>
+            <input type="text" class="form-control" id="id_ubicacion" name="ubicacion" value="{{ arrendamiento.ubicacion }}">
+        </div>
+        <div class="mb-3">
+            <label for="id_inquilino" class="form-label">Inquilino</label>
+            <select class="form-select" id="id_inquilino" name="inquilino">
+                <option value="" {% if not arrendamiento.inquilino %}selected{% endif %}>No Inquilino</option>
+                {% for inquilino in inquilinos %}
+                <option value="{{ inquilino.id }}" {% if arrendamiento.inquilino and arrendamiento.inquilino.id == inquilino.id %}selected{% endif %}>{{ inquilino }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        <a href="{% url 'alquileres' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

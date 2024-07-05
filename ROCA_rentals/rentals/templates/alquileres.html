@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Alquileres - ROCA Rentals{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <a href="{% url 'home' %}" class="btn btn-outline-custom me-2">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <h2 class="d-inline-block">Alquileres</h2>
+    </div>
+    <div>
+        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#editModal">Editar</button>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">+</button>
+    </div>
+</div>
+
+<div class="accordion" id="alquileresAccordion">
+    {% for tipo in tipos %}
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="heading{{ tipo.id }}">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ tipo.id }}" aria-expanded="false" aria-controls="collapse{{ tipo.id }}">
+                {{ tipo.descripcion }}
+            </button>
+        </h2>
+        <div id="collapse{{ tipo.id }}" class="accordion-collapse collapse" aria-labelledby="heading{{ tipo.id }}" data-bs-parent="#alquileresAccordion">
+            <div class="accordion-body">
+                {% for arrendamiento in tipo.arrendamientos.all %}
+                <div class="card mb-3" style="background-color: #F47B20;">
+                    <div class="card-header d-flex justify-content-between align-items-center" style="width: 100%;">
+                        <span>{{ arrendamiento.nombre }}</span>
+                        <div class="d-flex">
+                            {% if arrendamiento.inquilino %}
+                            <a href="#" class="btn btn-primary btn-sm me-2">Realizar Pago</a>
+                            <a href="#" class="btn btn-warning btn-sm me-2">Ingresar Cobro</a>
+                            {% endif %}
+                            <a href="{% url 'edit_arrendamiento' arrendamiento.id %}" class="btn btn-info btn-sm me-2">
+                                <i class="fas fa-pencil-alt"></i>
+                            </a>
+                            <button class="btn btn-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#info{{ arrendamiento.id }}">
+                                <i class="fas fa-arrow-down"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="collapse" id="info{{ arrendamiento.id }}">
+                        <div class="card-body" style="color: white;">
+                            <p>Alquiler: ₡{{ arrendamiento.alquiler }}</p>
+                            <p>NISE: {{ arrendamiento.nise }}</p>
+                            <p>Medidor de agua: {{ arrendamiento.med_agua }}</p>
+                            <p>Ubicación: {{ arrendamiento.ubicacion }}</p>
+                            <p>Inquilino: 
+                                {% if arrendamiento.inquilino %}
+                                <a href="{% url 'inquilino_profile' arrendamiento.inquilino.id %}">{{ arrendamiento.inquilino }}</a>
+                                {% else %}
+                                No Inquilino
+                                {% endif %}
+                            </p>
+                            <p>Deuda: 
+                                <a href="{% url 'deudas' arrendamiento.id %}">₡{{ arrendamiento.deuda }}</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Modal for Adding Tipo or Arrendamiento -->
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addModalLabel">Agregar Nuevo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Option to Add Tipo or Arrendamiento -->
+                <div class="mb-3">
+                    <button type="button" class="btn btn-secondary" id="addTipoBtn">Agregar Tipo</button>
+                    <button type="button" class="btn btn-primary" id="addArrendamientoBtn">Agregar Arrendamiento</button>
+                </div>
+
+                <!-- Form for Adding Tipo -->
+                <form id="tipoForm" style="display: none;" method="post" action="">
+                    {% csrf_token %}
+                    {{ tipo_form.as_p }}
+                    <button type="submit" class="btn btn-success" name="tipo_form">Guardar Tipo</button>
+                </form>
+
+                <!-- Form for Adding Arrendamiento -->
+                <form id="arrendamientoForm" style="display: none;" method="post" action="">
+                    {% csrf_token %}
+                    {{ arrendamiento_form.non_field_errors }}
+                    <div class="mb-3">
+                        <label for="id_tipo" class="form-label">Tipo</label>
+                        {{ arrendamiento_form.tipo }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_nombre" class="form-label">Nombre</label>
+                        {{ arrendamiento_form.nombre }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_alquiler" class="form-label">Alquiler (₡)</label>
+                        {{ arrendamiento_form.alquiler }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_nise" class="form-label">NISE</label>
+                        {{ arrendamiento_form.nise }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_med_agua" class="form-label">Medidor de Agua</label>
+                        {{ arrendamiento_form.med_agua }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_ubicacion" class="form-label">Ubicación</label>
+                        {{ arrendamiento_form.ubicacion }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_inquilino" class="form-label">Inquilino</label>
+                        {{ arrendamiento_form.inquilino }}
+                    </div>
+                    <button type="submit" class="btn btn-success" name="arrendamiento_form">Guardar Arrendamiento</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Editing Tipo -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Editar Tipo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Form for Editing Tipo -->
+                <form id="editForm" method="post" action="{% url 'edit_tipo' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="edit_tipo" class="form-label">Tipo</label>
+                        <select id="edit_tipo" name="tipo" class="form-select">
+                            <option value="todos">Todos</option>
+                            {% for tipo in tipos %}
+                            <option value="{{ tipo.id }}">{{ tipo.descripcion }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-info" onclick="showIncreaseForm()">Aumentar alquileres</button>
+                        <button type="button" class="btn btn-warning" onclick="showDecreaseForm()">Disminuir alquileres</button>
+                        <button type="button" class="btn btn-danger" onclick="showDeleteForm()">Eliminar Tipo</button>
+                    </div>
+
+                    <!-- Form for Increasing Alquileres -->
+                    <div id="increaseForm" style="display: none;">
+                        <div class="mb-3">
+                            <label for="increase_amount" class="form-label">Monto a Aumentar (₡)</label>
+                            <input type="number" class="form-control" id="increase_amount" name="increase_amount">
+                        </div>
+                        <button type="submit" class="btn btn-success" name="increase_form">Aumentar</button>
+                    </div>
+
+                    <!-- Form for Decreasing Alquileres -->
+                    <div id="decreaseForm" style="display: none;">
+                        <div class="mb-3">
+                            <label for="decrease_amount" class="form-label">Monto a Disminuir (₡)</label>
+                            <input type="number" class="form-control" id="decrease_amount" name="decrease_amount">
+                        </div>
+                        <button type="submit" class="btn btn-success" name="decrease_form">Disminuir</button>
+                    </div>
+
+                    <!-- Form for Deleting Tipo -->
+                    <div id="deleteForm" style="display: none;">
+                        <label for="announce" class="form-label">¿Está seguro de que desea eliminar esta categoría? Se eliminarán todos los alquileres que se encuentran en ella.</label>
+                        <p></p>
+                        <button type="submit" class="btn btn-danger" name="delete_form">Eliminar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showIncreaseForm() {
+        document.getElementById('increaseForm').style.display = 'block';
+        document.getElementById('decreaseForm').style.display = 'none';
+        document.getElementById('deleteForm').style.display = 'none';
+    }
+
+    function showDecreaseForm() {
+        document.getElementById('increaseForm').style.display = 'none';
+        document.getElementById('decreaseForm').style.display = 'block';
+        document.getElementById('deleteForm').style.display = 'none';
+    }
+
+    function showDeleteForm() {
+        document.getElementById('increaseForm').style.display = 'none';
+        document.getElementById('decreaseForm').style.display = 'none';
+        document.getElementById('deleteForm').style.display = 'block';
+    }
+
+    document.getElementById('addTipoBtn').addEventListener('click', function() {
+        document.getElementById('tipoForm').style.display = 'block';
+        document.getElementById('arrendamientoForm').style.display = 'none';
+    });
+
+    document.getElementById('addArrendamientoBtn').addEventListener('click', function() {
+        document.getElementById('arrendamientoForm').style.display = 'block';
+        document.getElementById('tipoForm').style.display = 'none';
+    });
+</script>
+
+{% endblock %}

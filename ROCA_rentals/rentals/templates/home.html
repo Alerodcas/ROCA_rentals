@@ -1,11 +1,44 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Home - ROCA Rentals{% endblock %}
 
 {% block content %}
-<h2 class="text-center mb-4">Bienvenido a ROCA Rentals</h2>
-<p class="text-center">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum vehicula nulla eget felis varius, sed feugiat ligula ultrices.</p>
-<div class="text-center mt-4">
-    <a href="#" class="btn btn-primary btn-lg">Explorar</a>
+<div class="text-end mt-3">
+    <a href="#" class="btn btn-outline-light">
+        <img src="{% static 'images/icons/icons8_profile.png' %}" alt="Profile" style="width: 40px; height: 40px;">
+    </a>
 </div>
+
+<div class="row justify-content-center mt-4">
+    {% for button in buttons %}
+    <div class="col-6 col-md-3 mb-3">
+        <a href="{% url button.dir %}" class="btn btn-primary btn-lg d-flex flex-column align-items-center">
+            <img src="{% static button.icon %}" alt="{{ button.name }}" class="mb-2" style="width: 50px; height: 50px;">
+            {{ button.name }}
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .btn-primary {
+        background-color: #F47B20;
+        border-color: #F47B20;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+    .btn-primary:hover {
+        background-color: #D35400;
+        border-color: #D35400;
+    }
+    .btn-outline-light {
+        border-color: white;
+    }
+</style>
 {% endblock %}

@@ -1,0 +1,11 @@
+<!-- aumentar_alquileres.html -->
+{% extends "base.html" %}
+{% block content %}
+<h2>Aumentar todos los alquileres</h2>
+<form method="post">
+  {% csrf_token %}
+  <label for="porcentaje">Porcentaje de aumento:</label>
+  <input type="number" id="porcentaje" name="porcentaje" required>
+  <button type="submit">Aumentar</button>
+</form>
+{% endblock %}

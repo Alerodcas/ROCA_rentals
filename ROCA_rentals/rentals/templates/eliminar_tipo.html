@@ -1,0 +1,10 @@
+<!-- eliminar_tipo.html -->
+{% extends "base.html" %}
+{% block content %}
+<h2>Eliminar Tipo</h2>
+<p>Esta seguro de que desea eliminar esta categoria? Se eliminaran todos los alquileres que se encuentran en ella.</p>
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">Eliminar</button>
+</form>
+{% endblock %}

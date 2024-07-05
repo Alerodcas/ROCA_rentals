@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.core.mail import send_mail
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
@@ -7,10 +7,8 @@ from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 
 from ROCA_rentals import settings
-from .forms import RegistroUsuarioForm
-from .forms import UsuarioLoginForm
-from .forms import PasswordResetRequestForm
-from .models import Usuario
+from .forms import *
+from .models import *
 from datetime import date
 from django.utils.http import urlsafe_base64_decode
 from django.contrib import messages
@@ -169,7 +167,139 @@ def user_login(request):
     return render(request, 'login.html', {'form': form})
 
 
-
 @login_required
 def home(request):
-    return render(request, 'home.html')
+    buttons = [
+        {'name': 'Alquileres', 'icon': 'images/icons/icons8_alquileres.png', 'dir': 'alquileres'},
+        {'name': 'Inquilinos', 'icon': 'images/icons/icons8_inquilinos.png', 'dir': 'alquileres'},
+        {'name': 'Imprimir Recibos', 'icon': 'images/icons/icons8_recibos.png', 'dir': 'alquileres'},
+        {'name': 'Ir a Cobrar', 'icon': 'images/icons/icons8_cobrar.png', 'dir': 'alquileres'},
+        {'name': 'Ver Deudas', 'icon': 'images/icons/icons8_deuda.png', 'dir': 'alquileres'},
+        {'name': 'Reportes Mensuales', 'icon': 'images/icons/icons8_reportes.png', 'dir': 'alquileres'},
+        {'name': 'Enviar Mensajes', 'icon': 'images/icons/icons8_message2.png', 'dir': 'alquileres'}
+    ]
+    
+    return render(request, 'home.html', {'buttons': buttons})
+
+@login_required
+def alquileres(request):
+    tipos = Tipo.objects.all()
+    for tipo in tipos:
+        tipo.arrendamientos = Arrendamiento.objects.filter(tipo=tipo, ced_usuario=request.user)
+        for arrendamiento in tipo.arrendamientos:
+            inquilino = Inquilino.objects.filter(id_casa=arrendamiento).first()
+            arrendamiento.inquilino = inquilino
+            if inquilino:
+                pagos_no_pagados = Pago.objects.filter(id_inquilino=inquilino, completado=False)
+                arrendamiento.deuda = sum(pago.restante for pago in pagos_no_pagados)
+            else:
+                arrendamiento.deuda = 0
+
+    if request.method == 'POST':
+        if 'tipo_form' in request.POST:
+            tipo_form = TipoForm(request.POST)
+            if tipo_form.is_valid():
+                tipo_form.save()
+                return redirect('alquileres')
+        elif 'arrendamiento_form' in request.POST:
+            arrendamiento_form = ArrendamientoForm(request.POST)
+            if arrendamiento_form.is_valid():
+                arrendamiento = arrendamiento_form.save(commit=False)
+                arrendamiento.ced_usuario = request.user
+                arrendamiento.save()
+                return redirect('alquileres')
+    else:
+        tipo_form = TipoForm()
+        arrendamiento_form = ArrendamientoForm()
+
+    return render(request, 'alquileres.html', {
+        'tipos': tipos,
+        'tipo_form': tipo_form,
+        'arrendamiento_form': arrendamiento_form,
+    })
+
+
+def edit_tipo(request):
+    if request.method == 'POST':
+        tipo_id = request.POST.get('tipo')
+
+        if tipo_id == "todos":
+            arrendamientos = Arrendamiento.objects.all()
+        else:
+            tipo = get_object_or_404(Tipo, id=tipo_id)
+            arrendamientos = tipo.arrendamiento_set.all()
+
+        if 'increase_form' in request.POST:
+            increase_amount = int(request.POST.get('increase_amount', 0))
+            for arrendamiento in arrendamientos:
+                arrendamiento.alquiler += increase_amount
+                arrendamiento.save()
+            messages.success(request, 'Alquileres aumentados exitosamente.')
+
+        elif 'decrease_form' in request.POST:
+            decrease_amount = int(request.POST.get('decrease_amount', 0))
+            for arrendamiento in arrendamientos:
+                arrendamiento.alquiler -= decrease_amount
+                arrendamiento.save()
+            messages.success(request, 'Alquileres disminuidos exitosamente.')
+
+        elif 'delete_form' in request.POST and tipo_id != "todos":
+            tipo = get_object_or_404(Tipo, id=tipo_id)
+            tipo_description = tipo.descripcion  # Retrieve the tipo description
+            tipo.delete()
+            messages.success(request, f'Tipo "{tipo_description}" y sus arrendamientos eliminados exitosamente.')
+            return redirect('alquileres')  # Ensure to redirect after setting message
+
+    return redirect('alquileres')
+
+def add_tipo(request):
+    if request.method == 'POST':
+        form = TipoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('alquileres')
+    else:
+        form = TipoForm()
+    return render(request, 'add_tipo.html', {'form': form})
+
+def add_arrendamiento(request):
+    if request.method == 'POST':
+        form = ArrendamientoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('alquileres')
+    else:
+        form = ArrendamientoForm()
+    return render(request, 'add_arrendamiento.html', {'form': form})
+
+def deudas(request, arrendamiento_id):
+    arrendamiento = get_object_or_404(Arrendamiento, pk=arrendamiento_id)
+    inquilino = arrendamiento.inquilino_set.first()
+    if inquilino:
+        deudas = Pago.objects.filter(id_inquilino=inquilino, completado=False)
+    else:
+        deudas = []
+    return render(request, 'deudas.html', {'arrendamiento': arrendamiento, 'deudas': deudas})
+
+def edit_arrendamiento(request, arrendamiento_id):
+    arrendamiento = get_object_or_404(Arrendamiento, pk=arrendamiento_id)
+    inquilinos = Inquilino.objects.all()
+
+    if request.method == 'POST':
+        arrendamiento.nombre = request.POST.get('nombre')
+        arrendamiento.alquiler = request.POST.get('alquiler')
+        arrendamiento.nise = request.POST.get('nise')
+        arrendamiento.med_agua = request.POST.get('med_agua')
+        arrendamiento.ubicacion = request.POST.get('ubicacion')
+
+        inquilino_id = request.POST.get('inquilino')
+        if inquilino_id:
+            arrendamiento.inquilino = Inquilino.objects.get(pk=inquilino_id)
+        else:
+            arrendamiento.inquilino = None
+
+        arrendamiento.save()
+        messages.success(request, 'Arrendamiento actualizado correctamente')
+        return redirect('alquileres')
+
+    return render(request, 'edit_arrendamiento.html', {'arrendamiento': arrendamiento, 'inquilinos': inquilinos})

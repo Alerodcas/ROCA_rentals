@@ -1,0 +1,11 @@
+<!-- disminuir_alquileres.html -->
+{% extends "base.html" %}
+{% block content %}
+<h2>Disminuir todos los alquileres</h2>
+<form method="post">
+  {% csrf_token %}
+  <label for="porcentaje">Porcentaje de disminución:</label>
+  <input type="number" id="porcentaje" name="porcentaje" required>
+  <button type="submit">Disminuir</button>
+</form>
+{% endblock %}
